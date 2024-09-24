@@ -9,8 +9,8 @@ from google.auth.transport.requests import Request
 import pickle
 
 # Paths to your credentials
-CLIENT_SECRETS_FILE = '/home/karolorzel/client_secret.json'
-TOKEN_PICKLE = '/home/karolorzel/token.pickle'
+CLIENT_SECRETS_FILE = '/home/user/client_secret.json'
+TOKEN_PICKLE = '/home/user/token.pickle'
 
 # AdSense API scope
 SCOPES = ['https://www.googleapis.com/auth/adsense.readonly']
