@@ -105,27 +105,36 @@ Paste the following code into the file:
 
 import os
 import datetime
+import sys
 from googleapiclient.discovery import build
-from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+import pickle
 
 # Paths to your credentials
-CLIENT_SECRETS_FILE = '/home/yourusername/client_secret.json'  # Update with your actual path
-TOKEN_JSON = '/home/yourusername/token.json'  # Update with your actual path
+CLIENT_SECRETS_FILE = '/home/karolorzel/client_secret.json'
+TOKEN_PICKLE = '/home/karolorzel/token.pickle'
 
 # AdSense API scope
 SCOPES = ['https://www.googleapis.com/auth/adsense.readonly']
 
 def get_service():
     creds = None
-    if os.path.exists(TOKEN_JSON):
-        creds = Credentials.from_authorized_user_file(TOKEN_JSON, SCOPES)
+    # Load credentials from the pickle file if it exists
+    if os.path.exists(TOKEN_PICKLE):
+        with open(TOKEN_PICKLE, 'rb') as token:
+            creds = pickle.load(token)
+    # If no valid credentials, let the user log in
     if not creds or not creds.valid:
-        flow = InstalledAppFlow.from_client_secrets_file(
-            CLIENT_SECRETS_FILE, SCOPES)
-        creds = flow.run_local_server(port=0)
-        with open(TOKEN_JSON, 'w') as token:
-            token.write(creds.to_json())
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CLIENT_SECRETS_FILE, SCOPES)
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for next time
+        with open(TOKEN_PICKLE, 'wb') as token:
+            pickle.dump(creds, token)
     service = build('adsense', 'v2', credentials=creds)
     return service
 
@@ -133,47 +142,32 @@ def main():
     try:
         service = get_service()
 
-        # Use your AdSense account ID directly
-        account_id = 'accounts/pub-XXXXXXXXXXXXXXXX'  # Replace with your actual account ID
+        # Get the AdSense account ID
+        accounts_response = service.accounts().list().execute()
+
+        # Get the AdSense account ID
+        accounts = service.accounts().list().execute()
+        account_id = accounts['accounts'][0]['name']
+
+        # Get today's date
+        today = datetime.date.today().isoformat()
 
         # Generate the report for today's earnings
-        today = datetime.date.today()
-        report_request = {
-            'dateRange': {
-                'startDate': {
-                    'year': today.year,
-                    'month': today.month,
-                    'day': today.day
-                },
-                'endDate': {
-                    'year': today.year,
-                    'month': today.month,
-                    'day': today.day
-                }
-            },
-            'metrics': ['ESTIMATED_EARNINGS']
-        }
-
-        # Call the API to generate the report
         report = service.accounts().reports().generate(
             account=account_id,
-            body=report_request
+            dateRange='TODAY',
+            metrics=['ESTIMATED_EARNINGS']
         ).execute()
 
-        # Extract earnings from the report
         earnings = report['totals']['cells'][0]['value']
-        currency_code = report['headers'][0]['currencyCode']
-        print(f"💰 AdSense Today: {earnings} {currency_code}")
-
+        print(f"💰 AdSense Today: ${earnings}")
     except Exception as e:
-        # Handle exceptions and display errors in Argos dropdown
-        print("AdSense Earnings")
+        print("Error fetching earnings")
         print("---")
-        print("Error fetching earnings:")
-        print(str(e))
 
 if __name__ == '__main__':
     main()
+
 ```
 
 **Important:**
