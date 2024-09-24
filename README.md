@@ -101,7 +101,7 @@ nano ~/.config/argos/adsense.1h.py
 Paste the following code into the file:
 
 ```python
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
 import datetime
@@ -112,8 +112,8 @@ from google.auth.transport.requests import Request
 import pickle
 
 # Paths to your credentials
-CLIENT_SECRETS_FILE = '/home/karolorzel/client_secret.json'
-TOKEN_PICKLE = '/home/karolorzel/token.pickle'
+CLIENT_SECRETS_FILE = '/home/yourusername/client_secret.json'  # Update with your actual path
+TOKEN_PICKLE = '/home/yourusername/token.pickle'               # Update with your actual path
 
 # AdSense API scope
 SCOPES = ['https://www.googleapis.com/auth/adsense.readonly']
@@ -143,14 +143,8 @@ def main():
         service = get_service()
 
         # Get the AdSense account ID
-        accounts_response = service.accounts().list().execute()
-
-        # Get the AdSense account ID
         accounts = service.accounts().list().execute()
         account_id = accounts['accounts'][0]['name']
-
-        # Get today's date
-        today = datetime.date.today().isoformat()
 
         # Generate the report for today's earnings
         report = service.accounts().reports().generate(
@@ -159,21 +153,26 @@ def main():
             metrics=['ESTIMATED_EARNINGS']
         ).execute()
 
+        # Extract earnings from the report
         earnings = report['totals']['cells'][0]['value']
-        print(f"💰 AdSense Today: ${earnings}")
+        currency_code = report['headers'][0]['currencyCode']
+        print(f"💰 AdSense Today: {earnings} {currency_code}")
+
     except Exception as e:
-        print("Error fetching earnings")
+        # Handle exceptions and display errors in Argos dropdown
+        print("AdSense Earnings")
         print("---")
+        print("Error fetching earnings:")
+        print(str(e))
 
 if __name__ == '__main__':
     main()
-
 ```
 
 **Important:**
 
-- Replace `/home/yourusername/client_secret.json` and `/home/yourusername/token.json` with the actual paths to your `client_secret.json` and desired location for `token.json`.
-- Replace `'accounts/pub-XXXXXXXXXXXXXXXX'` with your actual AdSense account ID (e.g., `'accounts/pub-1234567890123456'`).
+- Replace `/home/yourusername/client_secret.json` and `/home/yourusername/token.pickle` with the actual paths to your `client_secret.json` and desired location for `token.pickle`.
+- Ensure that the shebang line (`#!/usr/bin/env python3`) points to the correct Python interpreter.
 
 #### c. Make the Script Executable
 
@@ -192,7 +191,7 @@ The first time you run the script, it needs to authenticate with your Google acc
 ```
 
 - A browser window will open prompting you to log in to your Google account and grant permissions.
-- After authentication, the script will save the credentials to `token.json`.
+- After authentication, the script will save the credentials to `token.pickle`.
 
 ## Usage
 
@@ -214,9 +213,9 @@ The first time you run the script, it needs to authenticate with your Google acc
   - Verify that Argos extension is installed and enabled.
   - Reload GNOME Shell by pressing `Alt + F2`, typing `r`, and pressing `Enter`.
 - **Authentication Issues:**
-  - Delete `token.json` and rerun the script to re-authenticate.
+  - Delete `token.pickle` and rerun the script to re-authenticate.
     ```bash
-    rm /home/yourusername/token.json
+    rm /home/yourusername/token.pickle
     ~/.config/argos/adsense.1h.py
     ```
 - **API Errors:**
@@ -226,14 +225,24 @@ The first time you run the script, it needs to authenticate with your Google acc
   - Ensure the script outputs the earnings on the first line.
   - Check that all file paths in the script are absolute and correct.
   - Make sure all required Python libraries are installed system-wide.
+- **Python Dependencies Not Found:**
+  - If the script works when run manually but not with Argos, ensure that the Python libraries are installed in the system's Python environment.
+    ```bash
+    sudo pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+    ```
+- **Shebang Line Issues:**
+  - Ensure the shebang line at the top of the script points to the correct Python interpreter.
+    - Use `#!/usr/bin/env python3` for the system's default Python 3.
+    - If using a virtual environment, provide the absolute path to the Python interpreter.
 
 ## Security Considerations
 
 - **Protect Your Credentials:**
-  - Keep `client_secret.json` and `token.json` in a secure location.
+  - Keep `client_secret.json` and `token.pickle` in a secure location.
   - Ensure file permissions prevent unauthorized access.
 - **Do Not Share Sensitive Information:**
-  - Avoid committing `client_secret.json` or `token.json` to version control systems like GitHub.
+  - Avoid committing `client_secret.json` or `token.pickle` to version control systems like GitHub.
+  - Use placeholders or examples when sharing paths and account IDs.
 
 ## Acknowledgments
 
@@ -244,3 +253,23 @@ The first time you run the script, it needs to authenticate with your Google acc
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+**Notes:**
+
+- **Using `pickle` for Credentials:**
+  - The script uses `pickle` to store OAuth 2.0 credentials.
+  - Ensure that the `token.pickle` file is stored securely.
+- **Python Interpreter Path:**
+  - If you're using a specific Python environment (e.g., Anaconda), ensure the shebang line points to the correct interpreter.
+    - For example: `#!/home/yourusername/miniconda3/bin/python3`
+  - Adjust the shebang line accordingly if you encounter issues.
+
+**Example of Adjusted Shebang Line:**
+
+```python
+#!/home/yourusername/miniconda3/bin/python3
+```
+
+- Replace `/home/yourusername/miniconda3/bin/python3` with the path to your Python interpreter.
