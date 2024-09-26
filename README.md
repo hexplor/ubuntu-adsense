@@ -2,6 +2,9 @@
 
 This project provides a Python script that displays your Google AdSense earnings on the GNOME taskbar in Ubuntu, using the Argos extension. It allows you to monitor your AdSense earnings in real-time without needing to log into your AdSense account.
 
+![Ubuntu AdSense](screenshot.png)
+
+
 ## Table of Contents
 
 - [Features](#features)
