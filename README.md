@@ -28,7 +28,7 @@ This project provides a Python script that displays your Google AdSense earnings
 
 ## Prerequisites
 
-- **Ubuntu** with the GNOME desktop environment.
+- **Ubuntu** (or other Linux distribution) with the GNOME desktop environment.
 - **Python 3** installed.
 - A **Google AdSense** account with API access.
 - **Argos** GNOME Shell extension.
@@ -55,9 +55,11 @@ This project provides a Python script that displays your Google AdSense earnings
 1. Go to **APIs & Services** > **Credentials**.
 2. Click **Create Credentials** > **OAuth client ID**.
 3. Select **Desktop app** as the application type.
-4. Enter a name (e.g., `AdSenseTaskbarApp`) and click **Create**.
-5. Click **Download JSON** to get your `client_secret.json` file.
-6. Save this file in a secure location (e.g., `/home/yourusername/client_secret.json`).
+5. Enter a name (e.g., `AdSenseTaskbarApp`) and click **Create**.
+6. Click **Download JSON** to get your `client_secret.json` file.
+7. Save this file in a secure location (e.g., `/home/yourusername/client_secret.json`).
+
+Note: If Google asks your for a consent app, create it first.
 
 ### 2. Install Required Python Libraries
 
@@ -81,6 +83,8 @@ If you cannot install extensions from the browser, install the GNOME Shell integ
 ```bash
 sudo apt install chrome-gnome-shell
 ```
+
+Eventually [follow official github install instructions](https://github.com/p-e-w/argos) to install Argos properly. 
 
 ### 4. Set Up the Script
 
